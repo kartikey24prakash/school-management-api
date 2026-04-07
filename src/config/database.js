@@ -1,14 +1,16 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-const connectionUri = process.env.DATABASE_URL || process.env.MYSQL_URL;
+const connectionUri =
+  process.env.DATABASE_URL ||
+  process.env.MYSQL_PUBLIC_URL ||
+  process.env.MYSQL_URL;
+
 const sslEnabled =
   process.env.DB_SSL === "true" || process.env.MYSQL_SSL === "true";
 
 const poolConfig = connectionUri
-  ? {
-      uri: connectionUri,
-    }
+  ? connectionUri
   : {
       host: process.env.DB_HOST || process.env.MYSQLHOST || "localhost",
       port:
@@ -20,7 +22,8 @@ const poolConfig = connectionUri
     };
 
 const pool = mysql.createPool({
-  ...poolConfig,
+  ...(!connectionUri ? poolConfig : {}),
+  ...(connectionUri ? { uri: poolConfig } : {}),
   waitForConnections: true,
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 10,
   queueLimit: 0,
@@ -36,14 +39,22 @@ const pool = mysql.createPool({
     : {}),
 });
 
+const formatDbError = (error) => {
+  if (!error) {
+    return "Unknown database error";
+  }
+
+  return error.stack || error.code || error.message || JSON.stringify(error);
+};
+
 // Test connection on startup
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log("✅  MySQL connected successfully");
+    console.log("MySQL connected successfully");
     connection.release();
   } catch (error) {
-    console.error("❌  MySQL connection failed:", error.message);
+    console.error("MySQL connection failed:", formatDbError(error));
     process.exit(1);
   }
 };
@@ -66,9 +77,9 @@ const initializeDatabase = async () => {
 
   try {
     await pool.execute(createTableSQL);
-    console.log("✅  Database table 'schools' is ready");
+    console.log("Database table 'schools' is ready");
   } catch (error) {
-    console.error("❌  Failed to initialize database table:", error.message);
+    console.error("Failed to initialize database table:", formatDbError(error));
     process.exit(1);
   }
 };
