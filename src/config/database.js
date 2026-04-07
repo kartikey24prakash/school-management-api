@@ -1,17 +1,39 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
+const connectionUri = process.env.DATABASE_URL || process.env.MYSQL_URL;
+const sslEnabled =
+  process.env.DB_SSL === "true" || process.env.MYSQL_SSL === "true";
+
+const poolConfig = connectionUri
+  ? {
+      uri: connectionUri,
+    }
+  : {
+      host: process.env.DB_HOST || process.env.MYSQLHOST || "localhost",
+      port:
+        parseInt(process.env.DB_PORT || process.env.MYSQLPORT, 10) || 3306,
+      user: process.env.DB_USER || process.env.MYSQLUSER || "root",
+      password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || "",
+      database:
+        process.env.DB_NAME || process.env.MYSQLDATABASE || "school_management",
+    };
+
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "school_management",
+  ...poolConfig,
   waitForConnections: true,
-  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
+  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 10,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+  ...(sslEnabled
+    ? {
+        ssl: {
+          rejectUnauthorized:
+            process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false",
+        },
+      }
+    : {}),
 });
 
 // Test connection on startup
