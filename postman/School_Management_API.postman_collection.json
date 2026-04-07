@@ -2,40 +2,36 @@
   "info": {
     "_postman_id": "school-mgmt-api-collection",
     "name": "School Management API",
-    "description": "Complete collection for the School Management API. Covers adding schools and listing them sorted by proximity.\n\n**Base URL:** `{{base_url}}`  \nSet the `base_url` variable to your deployed host, e.g. `http://localhost:3000`",
+    "description": "Complete collection for the School Management API. Covers adding schools and listing them sorted by proximity.\n\nBase URL: `{{base_url}}`\nSet the `base_url` variable to your deployed host, e.g. `https://school-management-api-ro4a.onrender.com`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3000",
+      "value": "https://school-management-api-ro4a.onrender.com",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "Health & Info",
+      "name": "Health and Info",
       "item": [
         {
-          "name": "Root – API Info",
+          "name": "Root - API Info",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/",
-              "host": ["{{base_url}}"],
-              "path": [""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
             },
             "description": "Returns API status, version, and available endpoints."
-          },
-          "response": [
-            {
-              "name": "200 OK",
-              "status": "OK",
-              "code": 200,
-              "body": "{\n  \"success\": true,\n  \"message\": \"School Management API is running\",\n  \"version\": \"1.0.0\",\n  \"endpoints\": {\n    \"addSchool\": \"POST /addSchool\",\n    \"listSchools\": \"GET /listSchools?latitude={lat}&longitude={lon}\"\n  }\n}"
-            }
-          ]
+          }
         },
         {
           "name": "Health Check",
@@ -44,19 +40,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "Ping the API for liveness checks."
-          },
-          "response": [
-            {
-              "name": "200 Healthy",
-              "status": "OK",
-              "code": 200,
-              "body": "{\n  \"success\": true,\n  \"status\": \"healthy\",\n  \"uptime\": 123.45,\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\"\n}"
-            }
-          ]
+          }
         }
       ]
     },
@@ -64,7 +56,7 @@
       "name": "Schools",
       "item": [
         {
-          "name": "Add School – Success",
+          "name": "Add School - Success",
           "request": {
             "method": "POST",
             "header": [
@@ -84,22 +76,18 @@
             },
             "url": {
               "raw": "{{base_url}}/addSchool",
-              "host": ["{{base_url}}"],
-              "path": ["addSchool"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
             },
-            "description": "Add a new school. All four fields are required.\n\n**Required fields:**\n- `name` (string, 2–255 chars)\n- `address` (string, 5–500 chars)\n- `latitude` (float, -90 to 90)\n- `longitude` (float, -180 to 180)"
-          },
-          "response": [
-            {
-              "name": "201 Created",
-              "status": "Created",
-              "code": 201,
-              "body": "{\n  \"success\": true,\n  \"message\": \"School added successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Springfield Elementary School\",\n    \"address\": \"123 Main Street, Springfield, IL 62701\",\n    \"latitude\": 39.7817,\n    \"longitude\": -89.6501,\n    \"created_at\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
-            }
-          ]
+            "description": "Add a new school. All four fields are required."
+          }
         },
         {
-          "name": "Add School – Validation Error (missing fields)",
+          "name": "Add School - Validation Error",
           "request": {
             "method": "POST",
             "header": [
@@ -119,114 +107,42 @@
             },
             "url": {
               "raw": "{{base_url}}/addSchool",
-              "host": ["{{base_url}}"],
-              "path": ["addSchool"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "addSchool"
+              ]
             },
-            "description": "Demonstrates validation — empty name and invalid latitude."
-          },
-          "response": [
-            {
-              "name": "422 Unprocessable Entity",
-              "status": "Unprocessable Entity",
-              "code": 422,
-              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"name\", \"message\": \"School name is required\", \"value\": \"\" },\n    { \"field\": \"latitude\", \"message\": \"Latitude must be a number between -90 and 90\", \"value\": \"not-a-number\" }\n  ]\n}"
-            }
-          ]
+            "description": "Demonstrates validation for empty and invalid fields."
+          }
         },
         {
-          "name": "Add School – Duplicate Entry",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Springfield Elementary School\",\n  \"address\": \"123 Main Street, Springfield, IL 62701\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/addSchool",
-              "host": ["{{base_url}}"],
-              "path": ["addSchool"]
-            },
-            "description": "Re-sending the same school returns a 409 Conflict."
-          },
-          "response": [
-            {
-              "name": "409 Conflict",
-              "status": "Conflict",
-              "code": 409,
-              "body": "{\n  \"success\": false,\n  \"message\": \"A school with the same name and address already exists\",\n  \"data\": null\n}"
-            }
-          ]
-        },
-        {
-          "name": "List Schools – Sorted by Proximity",
+          "name": "List Schools - Sorted by Proximity",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/listSchools?latitude=39.7817&longitude=-89.6501",
-              "host": ["{{base_url}}"],
-              "path": ["listSchools"],
+              "raw": "{{base_url}}/listSchools?latitude=12.9716&longitude=77.5946",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "listSchools"
+              ],
               "query": [
                 {
                   "key": "latitude",
-                  "value": "39.7817",
-                  "description": "User's current latitude"
+                  "value": "12.9716"
                 },
                 {
                   "key": "longitude",
-                  "value": "-89.6501",
-                  "description": "User's current longitude"
+                  "value": "77.5946"
                 }
               ]
             },
-            "description": "Returns all schools sorted by distance (nearest first) from the provided user coordinates. Distance is calculated using the Haversine formula and expressed in kilometres."
-          },
-          "response": [
-            {
-              "name": "200 OK",
-              "status": "OK",
-              "code": 200,
-              "body": "{\n  \"success\": true,\n  \"message\": \"Schools retrieved and sorted by proximity\",\n  \"userLocation\": {\n    \"latitude\": 39.7817,\n    \"longitude\": -89.6501\n  },\n  \"total\": 3,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Springfield Elementary School\",\n      \"address\": \"123 Main Street, Springfield, IL 62701\",\n      \"latitude\": 39.7817,\n      \"longitude\": -89.6501,\n      \"created_at\": \"2024-01-15T10:30:00.000Z\",\n      \"distance_km\": 0\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Capital City High School\",\n      \"address\": \"789 Oak Blvd, Capital City, IL 62701\",\n      \"latitude\": 39.798,\n      \"longitude\": -89.644,\n      \"created_at\": \"2024-01-15T10:35:00.000Z\",\n      \"distance_km\": 1.9245\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Shelbyville Middle School\",\n      \"address\": \"456 Elm Ave, Shelbyville, IL 62565\",\n      \"latitude\": 39.4055,\n      \"longitude\": -88.7993,\n      \"created_at\": \"2024-01-15T10:32:00.000Z\",\n      \"distance_km\": 75.1823\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "List Schools – Validation Error (missing params)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/listSchools?latitude=39.7817",
-              "host": ["{{base_url}}"],
-              "path": ["listSchools"],
-              "query": [
-                {
-                  "key": "latitude",
-                  "value": "39.7817"
-                }
-              ]
-            },
-            "description": "Missing longitude returns a 422 validation error."
-          },
-          "response": [
-            {
-              "name": "422 Unprocessable Entity",
-              "status": "Unprocessable Entity",
-              "code": 422,
-              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"longitude\", \"message\": \"longitude query parameter is required\", \"value\": \"\" }\n  ]\n}"
-            }
-          ]
+            "description": "Returns all schools sorted by distance from the provided user coordinates."
+          }
         }
       ]
     }
